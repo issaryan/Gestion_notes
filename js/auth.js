@@ -1,64 +1,92 @@
-class Auth {
-    static token = null;
-    static user = null;
+// Module de gestion de l'authentification
+const Auth = {
+    token: null,
+    user: null,
 
-    static async login(email, password) {
+    // Initialisation
+    init() {
+        this.token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            this.user = JSON.parse(userData);
+        }
+    },
+
+    // Récupération du token
+    getToken() {
+        return this.token;
+    },
+
+    // Connexion
+    async login(email, password) {
         try {
-            const response = await fetch(`${CONFIG.API_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (!response.ok) {
-                throw new Error('Identifiants invalides');
-            }
-
-            const data = await response.json();
-            this.token = data.access_token;
+            const response = await API.login({ email, password });
+            this.token = response.access_token;
             localStorage.setItem('token', this.token);
 
-            await this.getCurrentUser();
+            // Récupération des informations utilisateur
+            await this.fetchUserInfo();
             return true;
         } catch (error) {
             console.error('Erreur de connexion:', error);
-            throw error;
+            throw new Error(CONFIG.MESSAGES.LOGIN_ERROR);
         }
-    }
+    },
 
-    static async getCurrentUser() {
+    // Récupération des informations utilisateur
+    async fetchUserInfo() {
         try {
-            const response = await fetch(`${CONFIG.API_URL}/auth/me`, {
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Erreur lors de la récupération du profil');
-            }
-
-            this.user = await response.json();
+            this.user = await API.getCurrentUser();
+            localStorage.setItem('user', JSON.stringify(this.user));
             return this.user;
         } catch (error) {
-            console.error('Erreur profil:', error);
+            this.logout();
             throw error;
         }
-    }
+    },
 
-    static logout() {
+    // Déconnexion
+    logout() {
         this.token = null;
         this.user = null;
         localStorage.removeItem('token');
-    }
+        localStorage.removeItem('user');
+        window.location.reload();
+    },
 
-    static isAuthenticated() {
+    // Vérification de l'authentification
+    isAuthenticated() {
         return !!this.token;
-    }
+    },
 
-    static getRole() {
-        return this.user?.role;
+    // Vérification du rôle
+    hasRole(role) {
+        return this.user && this.user.role === role;
+    },
+
+    // Vérification de l'expiration du token
+    checkTokenExpiration() {
+        const tokenData = this.parseJwt(this.token);
+        if (tokenData && tokenData.exp) {
+            const expirationTime = tokenData.exp * 1000;
+            if (Date.now() >= expirationTime) {
+                this.logout();
+                UI.showNotification(CONFIG.MESSAGES.SESSION_EXPIRED, 'error');
+                return false;
+            }
+        }
+        return true;
+    },
+
+    // Décodage du token JWT
+    parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(window.atob(base64));
+        } catch (error) {
+            console.error('Erreur de décodage du token:', error);
+            return null;
+        }
     }
-}
+};
