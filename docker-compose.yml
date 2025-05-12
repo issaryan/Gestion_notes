@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: flask-backend
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    volumes:
+      - .:/appa
+    environment:
+      - FLASK_APP=manage.py
+      - FLASK_ENV=development
+    command: >
+      bash -c "
+        echo '⏳ Attente de MySQL...';
+        echo '✅ MySQL est prêt !';
+
+        flask db upgrade &&
+        echo '✅ Migration appliquée.' &&
+
+        flask run --host=0.0.0.0 --port=5000
+      "
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: yourpassword
+      MYSQL_DATABASE: gestion_notes
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
+    driver: local

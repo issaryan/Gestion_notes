@@ -1,0 +1,31 @@
+# Ignorer les fichiers et dossiers de développement locaux
+*.pyc
+*.pyo
+__pycache__
+
+# Ignorer les fichiers temporaires ou de sauvegarde
+*.bak
+*.swp
+
+# Ignorer le dossier virtuel Python
+venv/
+.env
+
+# Ignorer les répertoires de tests
+tests/
+
+# Ignorer les répertoires et fichiers liés aux logs
+*.log
+
+# Ignorer le dossier de build
+build/
+dist/
+*.egg-info
+
+# Ignorer les fichiers de configuration IDE
+.idea/
+.vscode/
+
+# Ignorer Dockerfile et fichiers associés
+docker-compose.yml
+Dockerfile
