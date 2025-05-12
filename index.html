@@ -3,74 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Notes Académiques</title>
+    <title>Gestion des Notes - Système Académique</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="app">
-        <!-- Section Authentification -->
-        <div id="auth-section" class="section">
-            <h1>Gestion des Notes Académiques</h1>
+    <!-- Section Authentification -->
+    <div id="auth-section" class="section">
+        <div class="container">
+            <h1>Système de Gestion des Notes</h1>
             <div id="login-form" class="form-container">
                 <h2>Connexion</h2>
                 <form id="loginForm">
                     <div class="form-group">
-                        <label for="email">Email</label>
+                        <label for="email">Adresse email</label>
                         <input type="email" id="email" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Mot de passe</label>
                         <input type="password" id="password" required>
                     </div>
-                    <button type="submit">Se connecter</button>
+                    <button type="submit" class="btn btn-primary">Se connecter</button>
                 </form>
             </div>
         </div>
+    </div>
 
-        <!-- Section Principale (visible après connexion) -->
-        <div id="main-section" class="section hidden">
-            <header>
-                <h2>Tableau de bord</h2>
-                <div class="user-info">
+    <!-- Section Principale -->
+    <div id="main-section" class="section hidden">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-brand">Gestion des Notes</div>
+                <div class="nav-user">
                     <span id="userName"></span>
-                    <button id="logoutBtn">Déconnexion</button>
-                </div>
-            </header>
-            
-            <!-- Contenu dynamique selon le rôle -->
-            <div id="admin-dashboard" class="dashboard hidden">
-                <h3>Administration</h3>
-                <div class="admin-actions">
-                    <button onclick="showSection('users')">Gestion des Utilisateurs</button>
-                    <button onclick="showSection('classes')">Gestion des Classes</button>
-                    <button onclick="showSection('matieres')">Gestion des Matières</button>
+                    <button id="logoutBtn" class="btn btn-outline">Déconnexion</button>
                 </div>
             </div>
+        </nav>
 
-            <div id="teacher-dashboard" class="dashboard hidden">
-                <h3>Espace Enseignant</h3>
-                <div class="teacher-actions">
-                    <button onclick="showSection('notes')">Saisie des Notes</button>
-                    <button onclick="showSection('reports')">Rapports</button>
+        <!-- Dashboard Administrateur -->
+        <div id="admin-dashboard" class="dashboard hidden">
+            <div class="container">
+                <h2>Administration</h2>
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Utilisateurs</h3>
+                        <div class="actions">
+                            <button onclick="adminModule.showUsersList()">Liste des utilisateurs</button>
+                            <button onclick="adminModule.showUserForm()">Ajouter un utilisateur</button>
+                        </div>
+                        <div id="users-list" class="data-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>Classes</h3>
+                        <div class="actions">
+                            <button onclick="adminModule.showClassesList()">Liste des classes</button>
+                            <button onclick="adminModule.showClassForm()">Ajouter une classe</button>
+                        </div>
+                        <div id="classes-list" class="data-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>Matières</h3>
+                        <div class="actions">
+                            <button onclick="adminModule.showMatieresList()">Liste des matières</button>
+                            <button onclick="adminModule.showMatiereForm()">Ajouter une matière</button>
+                        </div>
+                        <div id="matieres-list" class="data-container"></div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div id="student-dashboard" class="dashboard hidden">
-                <h3>Espace Étudiant</h3>
-                <div id="student-notes">
-                    <h4>Mes Notes</h4>
-                    <div class="notes-list"></div>
+        <!-- Dashboard Enseignant -->
+        <div id="teacher-dashboard" class="dashboard hidden">
+            <div class="container">
+                <h2>Espace Enseignant</h2>
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Saisie des Notes</h3>
+                        <div class="actions">
+                            <button onclick="teacherModule.showNoteForm()">Nouvelle note</button>
+                            <button onclick="teacherModule.showImportForm()">Importer des notes</button>
+                        </div>
+                        <div id="note-form" class="form-container hidden"></div>
+                    </div>
+                    <div class="card">
+                        <h3>Rapports</h3>
+                        <div class="actions">
+                            <button onclick="teacherModule.downloadReport('pdf')">Export PDF</button>
+                            <button onclick="teacherModule.downloadReport('excel')">Export Excel</button>
+                            <button onclick="teacherModule.downloadReport('csv')">Export CSV</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Étudiant -->
+        <div id="student-dashboard" class="dashboard hidden">
+            <div class="container">
+                <h2>Mes Notes</h2>
+                <div class="card">
+                    <div id="notes-list" class="data-container">
+                        <div class="loader hidden"></div>
+                        <table class="notes-table hidden">
+                            <thead>
+                                <tr>
+                                    <th>Matière</th>
+                                    <th>Note</th>
+                                    <th>Coefficient</th>
+                                    <th>Date</th>
+                                    <th>Appréciation</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Notifications -->
     <div id="notification" class="notification hidden"></div>
 
+    <!-- Modales -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/teacher.js"></script>
+    <script src="js/student.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
