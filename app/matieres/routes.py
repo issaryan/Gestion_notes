@@ -81,14 +81,17 @@ def update_matiere(id):
 @matiere_bp.route('/<int:id>', methods=['DELETE'])
 def delete_matiere(id):
     """Supprime une matière"""
-    matiere_schema, error_schema = get_schemas()
-
     matiere = Matiere.query.get_or_404(id)
-    
-    try:
-        db.session.delete(matiere)
-        db.session.commit()
-        return jsonify({'message': 'Matière supprimée avec succès'}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify(error_schema.dump({'message': str(e)})), 500
+
+    # 🔒 Vérifie si un enseignant est lié à cette matière
+    if matiere.enseignants.count() > 0:
+        return jsonify({'message': 'Suppression impossible : des enseignants sont liés à cette matière.'}), 400
+
+    # 🔒 Vérifie si des notes existent pour cette matière
+    if len(matiere.notes) > 0:
+        return jsonify({'message': 'Suppression impossible : des notes existent pour cette matière.'}), 400
+
+    db.session.delete(matiere)
+    db.session.commit()
+    return jsonify({'message': 'Matière supprimée avec succès'}), 200
+
