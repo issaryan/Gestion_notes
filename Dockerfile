@@ -18,12 +18,12 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Étape 6 : exposer le port (par défaut Flask = 5000)
-EXPOSE 5000
+# Étape 6 : exposer le port (par défaut Flask = 5001)
+EXPOSE 5001
 
 # Étape 7 : définir la variable d'environnement pour Flask
 ENV FLASK_APP=run.py
 ENV FLASK_ENV=production
 
 # Étape 8 : point d'entrée (commande par défaut)
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "manage:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5001", "manage:app"]

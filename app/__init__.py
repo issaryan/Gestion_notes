@@ -1,6 +1,8 @@
 from flask import Flask
 from .extensions import db, jwt, migrate
 from .models import Role  # Import direct au niveau du module
+from .notes import notes_bp
+from .reports.routes import reports_bp
 from dotenv import load_dotenv
 load_dotenv()
 def create_app(config_class='config.Config'):
@@ -61,3 +63,5 @@ def register_blueprints(app):
     app.register_blueprint(classes_bp, url_prefix='/api/classes')
     app.register_blueprint(matiere_bp, url_prefix='/api/matieres')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(notes_bp, url_prefix='/api/notes')
+    app.register_blueprint(reports_bp, url_prefix='/api/reports')

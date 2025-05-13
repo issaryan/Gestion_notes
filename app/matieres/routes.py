@@ -17,7 +17,7 @@ def list_matieres():
     return jsonify([{
         'id': m.id,
         'nom': m.nom,
-        'coefficient': m.coefficient
+        'coefficient': m.coeff
     } for m in matieres])
 
 @matiere_bp.route('/', methods=['POST'])
@@ -35,7 +35,7 @@ def create_matiere():
     # Création de la matière
     nouvelle_matiere = Matiere(
         nom=data['nom'],
-        coefficient=data.get('coefficient', 1)
+        coeff=data.get('coefficient', 1)
     )
     
     try:
@@ -53,7 +53,7 @@ def get_matiere(id):
     return jsonify({
         'id': matiere.id,
         'nom': matiere.nom,
-        'coefficient': matiere.coefficient
+        'coefficient': matiere.coeff
     })
 
 @matiere_bp.route('/<int:id>', methods=['PUT'])
@@ -71,12 +71,12 @@ def update_matiere(id):
     
     try:
         matiere.nom = data['nom']
-        matiere.coefficient = data.get('coefficient', matiere.coefficient)
+        matiere.coeff = data.get('coefficient', matiere.coeff)
         db.session.commit()
         return jsonify(matiere_schema.dump(matiere))
     except Exception as e:
         db.session.rollback()
-        return jsonify(error_schema.dump({'message': str(e)})), 500
+        return jsonify({'message': str(e)}), 500
 
 @matiere_bp.route('/<int:id>', methods=['DELETE'])
 def delete_matiere(id):

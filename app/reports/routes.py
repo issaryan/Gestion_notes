@@ -10,6 +10,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from openpyxl import Workbook
+from flask import current_app
 
 from . import reports_bp
 from ..extensions import db
@@ -28,21 +29,25 @@ def role_required(*allowed_roles):
         return wrapper
     return decorator
 
+from flask import current_app
+
 def _fetch_notes_data():
-    """Récupère les données des notes avec les relations"""
-    query = (
-        db.session.query(
-            Etudiant.matricule.label('Matricule'),
-            User.nom.label('Nom'),
-            Matiere.nom.label('Matiere'),
-            Note.note.label('Note'),
-            Note.date_saisie.label('Date')
-        )
-        .join(Note, Etudiant.id == Note.etudiant_id)
-        .join(User, Etudiant.user_id == User.id)
-        .join(Matiere, Note.matiere_id == Matiere.id)
-    )
-    return pd.read_sql(query.statement, db.session.bind)
+    sql = """
+    SELECT 
+        e.matricule AS Matricule,
+        u.nom AS Nom,
+        m.nom AS Matiere,
+        n.note AS Note,
+        n.date_saisie AS Date
+    FROM etudiants e
+    JOIN notes n ON e.id = n.etudiant_id
+    JOIN users u ON e.user_id = u.id
+    JOIN matieres m ON n.matiere_id = m.id
+    """
+    with current_app.app_context():
+        return pd.read_sql(sql, db.engine)
+
+
 
 def _add_calculations(df):
     """Ajoute les calculs de moyenne et appréciation"""

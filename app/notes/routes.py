@@ -3,7 +3,7 @@
 from flask import request, jsonify
 from functools import wraps
 import pandas as pd
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 
 from . import notes_bp
 from ..extensions import db
@@ -31,14 +31,18 @@ def list_notes():
     """Liste les notes de l'étudiant connecté"""
     claims = get_jwt()
     
-    if claims.get('role') != 'ÉTUDIANT':
+    if claims.get('role').upper() != 'ETUDIANT':
         return jsonify({'message': 'Accès réservé aux étudiants'}), 403
 
-    etu = Etudiant.query.filter_by(user_id=claims.get('sub')).first()
+    user_id = claims.get('sub')
+    etu = Etudiant.query.filter_by(user_id=user_id).first()
     if not etu:
         return jsonify({'message': 'Profil étudiant introuvable'}), 404
 
     notes = Note.query.filter_by(etudiant_id=etu.id).all()
+    print("claims =", get_jwt())  # Ajoute cette ligne
+    print("identity =", get_jwt_identity())  # Et celle-ci
+
     return jsonify(notes_schema.dump(notes)), 200
 
 @notes_bp.route('', methods=['POST'])

@@ -8,6 +8,7 @@ class ClasseSchema(SQLAlchemyAutoSchema):
         model = Classe
         load_instance = True
         include_fk = True
+        sqla_session = db.session
 
 class ClasseCreateSchema(Schema):  # Utilise maintenant le Schema importé
     nom = fields.Str(required=True, validate=validate.Length(min=2, max=50))

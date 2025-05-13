@@ -3,6 +3,7 @@
 from flask import request, jsonify
 from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt
+from werkzeug.security import generate_password_hash
 
 from . import users_bp
 from ..extensions import db
@@ -71,7 +72,7 @@ def create_user():
     user = User(
         nom=data['nom'],
         email=data['email'],
-        password_hash=user.set_password(data['password']),
+        password_hash=generate_password_hash(data['password']),
         role_id=role.id
     )
     db.session.add(user)

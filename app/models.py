@@ -36,7 +36,7 @@ class User(db.Model):
     
     # Relations
     etudiant = db.relationship('Etudiant', backref='user', uselist=False, cascade='all, delete-orphan')
-    enseignant_matieres = db.relationship('Enseigne', backref='enseignant', lazy='dynamic', cascade='all, delete-orphan')
+    enseignant_matieres = db.relationship('Enseigne', backref='enseignant', lazy='select', cascade='all, delete-orphan')
 
 class Classe(db.Model):
     __tablename__ = 'classes'
@@ -68,6 +68,7 @@ class Note(db.Model):
     note = db.Column(db.Float, nullable=False)
     date_saisie = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
+    @property
     def appreciation(self):
         if self.note >= 12:
             return 'Excellent'
